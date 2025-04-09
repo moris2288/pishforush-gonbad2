@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سامانه ملک‌های در حال ساخت گنبد کاووس | مشاور املاک خان احمدی</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Iranian+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Iranian Sans', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #d10a0a, #8b0000);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo img {
+            height: 40px;
+            margin-left: 10px;
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9rem;
+        }
+        
+        .contact-info a {
+            color: white;
+            text-decoration: none;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .contact-info a i {
+            margin-left: 5px;
+        }
+        
+        .telegram-channel {
+            background-color: #0088cc;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 10px;
+            text-decoration: none;
+        }
+        
+        .telegram-channel i {
+            margin-left: 5px;
+        }
+
+        /* تبلیغات دوره ای */
+        .ad-banner {
+            background-color: #f8f9fa;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ad-banner img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 5px;
+        }
+
+        .ad-banner a {
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .main-content {
+            padding: 20px 0;
+        }
+        
+        .map-container {
+            height: 60vh;
+            min-height: 300px;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .property-info {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .property-info.active {
+            display: block;
+        }
+        
+        .property-title {
+            color: #d10a0a;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .property-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .property-detail {
+            flex: 1 1 200px;
+        }
+        
+        .property-images {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .property-image {
+            min-width: 250px;
+            height: 180px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+        
+        .update-date {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: left;
+        }
+        
+        .admin-panel-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #333;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .admin-panel.active {
+            display: flex;
+        }
+        
+        .admin-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-form h2 {
+            color: #d10a0a;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background-color: #d10a0a;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #666;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .image-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+        }
+        
+        .file-input-label {
+            display: block;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 5px;
+            border: 1px dashed #999;
+        }
+        
+        .file-input-label i {
+            margin-left: 5px;
+        }
+        
+        #imageUpload {
+            display: none;
+        }
+        
+        .properties-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .property-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .property-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .property-item.active {
+            background-color: #e9f7fe;
+        }
+        
+        .property-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 2px 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .edit-btn {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo {
+                margin-bottom: 15px;
+                justify-content: center;
+                font-size: 1rem;
+            }
+            
+            .contact-info {
+                align-items: center;
+            }
+            
+            .map-container {
+                height: 50vh;
+                min-height: 250px;
+            }
+            
+            .property-images {
+                flex-direction: column;
+                overflow-x: unset;
+            }
+            
+            .property-image {
+                min-width: 100%;
+                height: auto;
+                max-height: 200px;
+            }
+            
+            .admin-form {
+                padding: 15px;
+            }
+            
+            .admin-form h2 {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+            }
+            
+            .admin-panel-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span>سامانه ملک‌های در حال ساخت گنبد کاووس</span>
+                </div>
+                <div class="contact-info">
+                    <div>
+                        <a href="tel:09111791024"><i class="fas fa-phone"></i> 09111791024</a>
+                        <a href="tel:09116691558"><i class="fas fa-phone"></i> 09116691558</a>
+                    </div>
+                    <a href="https://t.me/amlakkhanahmadi" class="telegram-channel" target="_blank" style="background-color: #0088cc; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;">
+                        telegram : https://t.me/amlakkhanahmadi
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- کادر تبلیغات دوره ای -->
+    <div class="container">
+        <div class="ad-banner" id="adBanner">
+            اینجا محل تبلیغ شماست
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            
+            <div class="property-info" id="propertyInfo">
+                <h2 class="property-title" id="propertyTitle">نام پروژه</h2>
+                <div class="property-details">
+                    <div class="property-detail">
+                        <strong>سازنده:</strong> <span id="propertyBuilder">-</span>
+                    </div>
+                    <div class="property-detail">
+                        <strong>آدرس:</strong> <span id="propertyAddress">-</span>
+                    </div>
+                </div>
+                <div class="property-images" id="propertyImages">
+                    <!-- Images will be added here dynamically -->
+                </div>
+                <div class="update-date">
+                    آخرین بروزرسانی: <span id="propertyUpdateDate">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="admin-panel-btn" id="adminPanelBtn">
+        <i class="fas fa-lock"></i>
+    </div>
+    
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-form">
+            <h2>ورود به پنل مدیریت</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">نام کاربری</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">رمز عبور</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelLogin">انصراف</button>
+                    <button type="submit" class="btn btn-primary">ورود</button>
+                </div>
+            </form>
+            
+            <div id="adminDashboard" style="display: none;">
+                <h2>پنل مدیریت</h2>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" id="addNewProperty">افزودن ملک جدید</button>
+                    <button type="button" class="btn btn-secondary" id="logoutAdmin">خروج</button>
+                </div>
+
+                <!-- تبلیغات دوره ای در پنل مدیریت -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <h3>مدیریت تبلیغات دوره ای</h3>
+                    <label for="adType">نوع تبلیغ</label>
+                    <select id="adType" class="form-group">
+                        <option value="text">متن ساده</option>
+                        <option value="image">تصویر</option>
+                        <option value="link">لینک</option>
+                    </select>
+
+                    <div id="textAdFields" style="display: block;">
+                        <label for="adText">متن تبلیغ</label>
+                        <textarea id="adText" rows="3" class="form-group"></textarea>
+                    </div>
+
+                    <div id="imageAdFields" style="display: none;">
+                        <label for="adImageUrl">آدرس تصویر</label>
+                        <input type="text" id="adImageUrl" class="form-group" placeholder="https://example.com/image.jpg">
+                    </div>
+
+                    <div id="linkAdFields" style="display: none;">
+                        <label for="adLinkUrl">آدرس لینک</label>
+                        <input type="text" id="adLinkUrl" class="form-group" placeholder="https://example.com">
+                        <label for="adLinkText">متن لینک</label>
+                        <input type="text" id="adLinkText" class="form-group" placeholder="متن نمایشی">
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="saveAd" style="margin-top: 10px;">ذخیره تبلیغ</button>
+                </div>
+                
+                <div class="properties-list" id="propertiesList">
+                    <!-- List of properties will be added here -->
+                </div>
+            </div>
+            
+            <form id="propertyForm" style="display: none;">
+                <h2 id="propertyFormTitle">افزودن ملک جدید</h2>
+                <input type="hidden" id="propertyId">
+                <div class="form-group">
+                    <label for="propertyName">نام پروژه</label>
+                    <input type="text" id="propertyName" required>
+                </div>
+                <div class="form-group">
+                    <label for="propertyBuilderName">نام سازنده</label>
+                    <input type="text" id="propertyBuilderName" required>
+                </div>
+                <div class="form-group">
+                    <label for="propertyLat">عرض جغرافیایی</label>
+                    <input type="text" id="propertyLat" required inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="propertyLng">طول جغرافیایی</label>
+                    <input type="text" id="propertyLng" required inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label for="propertyAddressInput">آدرس دقیق</label>
+                    <textarea id="propertyAddressInput" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>تصاویر (حداکثر 10 تصویر)</label>
+                    <label for="imageUpload" class="file-input-label">
+                        <i class="fas fa-upload"></i>
+                        انتخاب تصاویر از گالری
+                    </label>
+                    <input type="file" id="imageUpload" accept="image/*" multiple>
+                    <div class="image-preview-container" id="imagePreviewContainer">
+                        <!-- Image previews will be shown here -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="propertyUpdateDateInput">تاریخ بروزرسانی</label>
+                    <input type="text" id="propertyUpdateDateInput" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelPropertyForm">انصراف</button>
+                    <button type="submit" class="btn btn-primary" id="saveProperty">ذخیره ملک</button>
+                    <button type="button" class="btn btn-danger" id="deleteProperty" style="display: none;">حذف ملک</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>کلیه حقوق این سامانه متعلق به مشاور املاک خان احمدی می‌باشد © ۱۴۰۴</p>
+        </div>
+    </footer>
+    
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        // Initialize map variable
+        let map;
+        let properties = [];
+        let markers = {};
+        let selectedImages = [];
+        let isEditing = false;
+        let currentPropertyId = null;
+
+        // DOM elements
+        const adminPanelBtn = document.getElementById('adminPanelBtn');
+        const adminPanel = document.getElementById('adminPanel');
+        const cancelLogin = document.getElementById('cancelLogin');
+        const loginForm = document.getElementById('loginForm');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const addNewPropertyBtn = document.getElementById('addNewProperty');
+        const logoutAdminBtn = document.getElementById('logoutAdmin');
+        const propertiesList = document.getElementById('propertiesList');
+        const propertyForm = document.getElementById('propertyForm');
+        const propertyFormTitle = document.getElementById('propertyFormTitle');
+        const propertyIdInput = document.getElementById('propertyId');
+        const cancelPropertyForm = document.getElementById('cancelPropertyForm');
+        const savePropertyBtn = document.getElementById('saveProperty');
+        const deletePropertyBtn = document.getElementById('deleteProperty');
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const adBanner = document.getElementById('adBanner');
+        const adType = document.getElementById('adType');
+        const textAdFields = document.getElementById('textAdFields');
+        const imageAdFields = document.getElementById('imageAdFields');
+        const linkAdFields = document.getElementById('linkAdFields');
+        const adText = document.getElementById('adText');
+        const adImageUrl = document.getElementById('adImageUrl');
+        const adLinkUrl = document.getElementById('adLinkUrl');
+        const adLinkText = document.getElementById('adLinkText');
+        const saveAdBtn = document.getElementById('saveAd');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Force show admin button on mobile
+            adminPanelBtn.style.display = 'flex';
+            
+            // Initialize map
+            initMap();
+            
+            // Load sample data
+            loadSampleData();
+            
+            // Setup event listeners
+            setupEventListeners();
+
+            // Load saved ad if exists
+            loadSavedAd();
+        });
+
+        // Initialize map
+        function initMap() {
+            // Remove existing map if any
+            if (map) {
+                map.remove();
+            }
+            
+            // Create new map instance
+            map = L.map('map', {
+                tap: false,
+                dragging: true,
+                tapTolerance: 15
+            }).setView([37.2500, 55.1672], 13);
+
+            // Add tile layer with HTTPS
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+                minZoom: 10
+            }).addTo(map);
+
+            // Mobile-specific settings
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                map.touchZoom.enable();
+                map.doubleClickZoom.disable();
+                map.scrollWheelZoom.enable();
+            }
+
+            // Fix map size
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 300);
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            // Try to load from localStorage
+            const savedProperties = localStorage.getItem('properties');
+            
+            if (savedProperties) {
+                try {
+                    properties = JSON.parse(savedProperties);
+                } catch (e) {
+                    console.error('Error parsing saved properties:', e);
+                    loadDefaultProperties();
+                }
+            } else {
+                loadDefaultProperties();
+            }
+            
+            loadProperties();
+        }
+
+        // Load default properties
+        function loadDefaultProperties() {
+            properties = [
+                {
+                    id: 1,
+                    name: "پروژه نمونه یک",
+                    builder: "شرکت ساختمانی الف",
+                    lat: 37.2510,
+                    lng: 55.1680,
+                    address: "خیابان 17 شهریور شرقی، دانش جنوبی، نبش دانش یکم",
+                    images: [
+                        "https://via.placeholder.com/500x300?text=تصویر+پروژه+1",
+                        "https://via.placeholder.com/500x300?text=تصویر+پروژه+2"
+                    ],
+                    updateDate: "۱۴۰۲/۰۵/۱۵"
+                },
+                {
+                    id: 2,
+                    name: "پروژه نمونه دو",
+                    builder: "شرکت ساختمانی ب",
+                    lat: 37.2480,
+                    lng: 55.1650,
+                    address: "بلوار معلم، بین کوچه 12 و 14",
+                    images: [
+                        "https://via.placeholder.com/500x300?text=تصویر+پروژه+3",
+                        "https://via.placeholder.com/500x300?text=تصویر+پروژه+4"
+                    ],
+                    updateDate: "۱۴۰۲/۰۵/۱۰"
+                }
+            ];
+        }
+
+        // Load properties onto map
+        function loadProperties() {
+            // Clear existing markers
+            for (const id in markers) {
+                map.removeLayer(markers[id]);
+            }
+            markers = {};
+            
+            // Add markers for each property
+            properties.forEach(property => {
+                // Validate coordinates
+                if (!isValidCoordinate(property.lat, property.lng)) {
+                    console.error('Invalid coordinates for property:', property.id);
+                    return;
+                }
+                
+                const marker = L.marker([property.lat, property.lng], {
+                    icon: L.divIcon({
+                        className: 'property-marker',
+                        html: '<div style="background-color: red; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+                        iconSize: [24, 24]
+                    })
+                }).addTo(map);
+                
+                marker.bindPopup(`<b>${property.name}</b><br>سازنده: ${property.builder}`);
+                
+                marker.on('click', function() {
+                    showPropertyInfo(property);
+                });
+                
+                markers[property.id] = marker;
+            });
+            
+            // Update properties list in admin panel
+            updatePropertiesList();
+            
+            // Refresh map
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+        }
+
+        // Validate coordinates
+        function isValidCoordinate(lat, lng) {
+            return !isNaN(lat) && !isNaN(lng) && 
+                   lat >= -90 && lat <= 90 && 
+                   lng >= -180 && lng <= 180;
+        }
+
+        // Show property information
+        function showPropertyInfo(property) {
+            document.getElementById('propertyTitle').textContent = property.name;
+            document.getElementById('propertyBuilder').textContent = property.builder;
+            document.getElementById('propertyAddress').textContent = property.address || 'ثبت نشده';
+            document.getElementById('propertyUpdateDate').textContent = property.updateDate;
+            
+            const imagesContainer = document.getElementById('propertyImages');
+            imagesContainer.innerHTML = '';
+            
+            property.images.forEach(imageUrl => {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = property.name;
+                img.className = 'property-image';
+                img.loading = 'lazy';
+                imagesContainer.appendChild(img);
+            });
+            
+            document.getElementById('propertyInfo').classList.add('active');
+            
+            // Scroll to property info
+            document.getElementById('propertyInfo').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Admin panel button
+            adminPanelBtn.addEventListener('click', () => {
+                adminPanel.classList.add('active');
+                loginForm.style.display = 'block';
+                adminDashboard.style.display = 'none';
+                propertyForm.style.display = 'none';
+                document.body.style.overflow = 'hidden';
+            });
+            
+            // Cancel login
+            cancelLogin.addEventListener('click', () => {
+                closeAdminPanel();
+            });
+            
+            // Logout button
+            logoutAdminBtn.addEventListener('click', () => {
+                closeAdminPanel();
+            });
+            
+            // Add new property button
+            addNewPropertyBtn.addEventListener('click', () => {
+                showPropertyForm();
+            });
+            
+            // Cancel property form
+            cancelPropertyForm.addEventListener('click', () => {
+                showAdminDashboard();
+            });
+            
+            // Login form submission
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (username === 'amlakkhanahmadi' && password === 'Sepide1791024') {
+                    showAdminDashboard();
+                } else {
+                    alert('نام کاربری یا رمز عبور اشتباه است');
+                }
+            });
+            
+            // Image upload
+            imageUpload.addEventListener('change', (e) => {
+                const files = e.target.files;
+                selectedImages = [];
+                imagePreviewContainer.innerHTML = '';
+                
+                if (files.length > 10) {
+                    alert('حداکثر می‌توانید 10 تصویر انتخاب کنید');
+                    e.target.value = '';
+                    return;
+                }
+                
+                for (let i = 0; i < Math.min(files.length, 10); i++) {
+                    const file = files[i];
+                    if (file.type.startsWith('image/')) {
+                        selectedImages.push(file);
+                        
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.className = 'image-preview';
+                            imagePreviewContainer.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            });
+            
+            // Property form submission
+            propertyForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const lat = parseFloat(document.getElementById('propertyLat').value);
+                const lng = parseFloat(document.getElementById('propertyLng').value);
+                
+                if (!isValidCoordinate(lat, lng)) {
+                    alert('مختصات وارد شده نامعتبر است');
+                    return;
+                }
+                
+                const propertyData = {
+                    id: isEditing ? currentPropertyId : Date.now(),
+                    name: document.getElementById('propertyName').value,
+                    builder: document.getElementById('propertyBuilderName').value,
+                    lat: lat,
+                    lng: lng,
+                    address: document.getElementById('propertyAddressInput').value,
+                    updateDate: document.getElementById('propertyUpdateDateInput').value,
+                    images: []
+                };
+                
+                // In a real app, you would upload images to a server here
+                if (isEditing && selectedImages.every(img => typeof img === 'string')) {
+                    propertyData.images = selectedImages;
+                } else {
+                    propertyData.images = selectedImages.map((img, index) => 
+                        typeof img === 'string' ? img : 
+                        `https://via.placeholder.com/500x300?text=تصویر+${propertyData.name}-${index + 1}`
+                    );
+                }
+                
+                if (isEditing) {
+                    // Update existing property
+                    const index = properties.findIndex(p => p.id === currentPropertyId);
+                    if (index !== -1) {
+                        properties[index] = propertyData;
+                    }
+                } else {
+                    // Add new property
+                    properties.push(propertyData);
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('properties', JSON.stringify(properties));
+                
+                // Reload properties
+                loadProperties();
+                
+                // Show success message
+                alert(isEditing ? 'تغییرات با موفقیت ذخیره شد' : 'ملک جدید با موفقیت اضافه شد');
+                
+                // Return to dashboard
+                showAdminDashboard();
+            });
+            
+            // Delete property button
+            deletePropertyBtn.addEventListener('click', () => {
+                if (confirm('آیا از حذف این ملک مطمئن هستید؟')) {
+                    properties = properties.filter(p => p.id !== currentPropertyId);
+                    localStorage.setItem('properties', JSON.stringify(properties));
+                    loadProperties();
+                    alert('ملک با موفقیت حذف شد');
+                    showAdminDashboard();
+                }
+            });
+
+            // Ad type change
+            adType.addEventListener('change', function() {
+                textAdFields.style.display = 'none';
+                imageAdFields.style.display = 'none';
+                linkAdFields.style.display = 'none';
+
+                if (this.value === 'text') {
+                    textAdFields.style.display = 'block';
+                } else if (this.value === 'image') {
+                    imageAdFields.style.display = 'block';
+                } else if (this.value === 'link') {
+                    linkAdFields.style.display = 'block';
+                }
+            });
+
+            // Save ad button
+            saveAdBtn.addEventListener('click', function() {
+                const type = adType.value;
+                let adContent = '';
+                let adData = {};
+
+                if (type === 'text') {
+                    const text = adText.value.trim();
+                    if (!text) {
+                        alert('لطفا متن تبلیغ را وارد کنید');
+                        return;
+                    }
+                    adContent = text;
+                    adData = { type: 'text', content: text };
+                } else if (type === 'image') {
+                    const imageUrl = adImageUrl.value.trim();
+                    if (!imageUrl) {
+                        alert('لطفا آدرس تصویر را وارد کنید');
+                        return;
+                    }
+                    adContent = `<img src="${imageUrl}" alt="تبلیغ" style="max-width:100%;">`;
+                    adData = { type: 'image', content: imageUrl };
+                } else if (type === 'link') {
+                    const linkUrl = adLinkUrl.value.trim();
+                    const linkText = adLinkText.value.trim();
+                    if (!linkUrl || !linkText) {
+                        alert('لطفا آدرس لینک و متن نمایشی را وارد کنید');
+                        return;
+                    }
+                    adContent = `<a href="${linkUrl}" target="_blank" style="color:#d10a0a;font-weight:bold;">${linkText}</a>`;
+                    adData = { type: 'link', content: { url: linkUrl, text: linkText } };
+                }
+
+                // Save to localStorage
+                localStorage.setItem('advertisement', JSON.stringify(adData));
+                
+                // Update ad banner
+                updateAdBanner(adContent);
+                alert('تبلیغ با موفقیت ذخیره شد');
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (map) {
+                    setTimeout(() => {
+                        map.invalidateSize();
+                    }, 100);
+                }
+            });
+            
+            // Handle orientation change
+            window.addEventListener('orientationchange', function() {
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                    }
+                }, 300);
+            });
+        }
+
+        // Load saved ad from localStorage
+        function loadSavedAd() {
+            const adData = localStorage.getItem('advertisement');
+            if (!adData) return;
+
+            try {
+                const { type, content } = JSON.parse(adData);
+                let adContent = '';
+
+                if (type === 'text') {
+                    adText.value = content;
+                    adContent = content;
+                } else if (type === 'image') {
+                    adImageUrl.value = content;
+                    adContent = `<img src="${content}" alt="تبلیغ" style="max-width:100%;">`;
+                } else if (type === 'link') {
+                    adLinkUrl.value = content.url;
+                    adLinkText.value = content.text;
+                    adContent = `<a href="${content.url}" target="_blank" style="color:#d10a0a;font-weight:bold;">${content.text}</a>`;
+                }
+
+                // Set the ad type
+                adType.value = type;
+                textAdFields.style.display = 'none';
+                imageAdFields.style.display = 'none';
+                linkAdFields.style.display = 'none';
+                
+                if (type === 'text') textAdFields.style.display = 'block';
+                else if (type === 'image') imageAdFields.style.display = 'block';
+                else if (type === 'link') linkAdFields.style.display = 'block';
+
+                // Update ad banner
+                updateAdBanner(adContent);
+            } catch (e) {
+                console.error('Error parsing ad data:', e);
+            }
+        }
+
+        // Update ad banner with new content
+        function updateAdBanner(content) {
+            adBanner.innerHTML = content || 'اینجا محل تبلیغ شماست';
+        }
+
+        // Update properties list in admin panel
+        function updatePropertiesList() {
+            propertiesList.innerHTML = '';
+            
+            if (properties.length === 0) {
+                propertiesList.innerHTML = '<p>هیچ ملکی ثبت نشده است</p>';
+                return;
+            }
+            
+            properties.forEach(property => {
+                const div = document.createElement('div');
+                div.className = 'property-item';
+                div.innerHTML = `
+                    <span>${property.name}</span>
+                    <div class="property-actions">
+                        <button class="action-btn edit-btn" data-id="${property.id}">ویرایش</button>
+                        <button class="action-btn delete-btn" data-id="${property.id}">حذف</button>
+                    </div>
+                `;
+                propertiesList.appendChild(div);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    const property = properties.find(p => p.id === id);
+                    if (property) {
+                        showPropertyForm(property);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.getAttribute('data-id'));
+                    if (confirm('آیا از حذف این ملک مطمئن هستید؟')) {
+                        properties = properties.filter(p => p.id !== id);
+                        localStorage.setItem('properties', JSON.stringify(properties));
+                        loadProperties();
+                        alert('ملک با موفقیت حذف شد');
+                    }
+                });
+            });
+        }
+
+        // Show property form
+        function showPropertyForm(property = null) {
+            loginForm.style.display = 'none';
+            adminDashboard.style.display = 'none';
+            propertyForm.style.display = 'block';
+            
+            if (property) {
+                // Edit mode
+                isEditing = true;
+                currentPropertyId = property.id;
+                propertyFormTitle.textContent = 'ویرایش ملک';
+                propertyIdInput.value = property.id;
+                document.getElementById('propertyName').value = property.name;
+                document.getElementById('propertyBuilderName').value = property.builder;
+                document.getElementById('propertyLat').value = property.lat;
+                document.getElementById('propertyLng').value = property.lng;
+                document.getElementById('propertyAddressInput').value = property.address || '';
+                document.getElementById('propertyUpdateDateInput').value = property.updateDate;
+                
+                // Show existing images
+                imagePreviewContainer.innerHTML = '';
+                selectedImages = property.images;
+                property.images.forEach(imgUrl => {
+                    const img = document.createElement('img');
+                    img.src = imgUrl;
+                    img.className = 'image-preview';
+                    imagePreviewContainer.appendChild(img);
+                });
+                
+                // Show delete button
+                deletePropertyBtn.style.display = 'block';
+                savePropertyBtn.textContent = 'ذخیره تغییرات';
+            } else {
+                // Add new mode
+                isEditing = false;
+                currentPropertyId = null;
+                propertyFormTitle.textContent = 'افزودن ملک جدید';
+                document.getElementById('propertyUpdateDateInput').value = new Date().toLocaleDateString('fa-IR');
+                
+                // Hide delete button
+                deletePropertyBtn.style.display = 'none';
+                savePropertyBtn.textContent = 'ذخیره ملک';
+            }
+            
+            // Scroll to top
+            adminPanel.scrollTo(0, 0);
+        }
+
+        // Show admin dashboard
+        function showAdminDashboard() {
+            loginForm.style.display = 'none';
+            adminDashboard.style.display = 'block';
+            propertyForm.style.display = 'none';
+            resetPropertyForm();
+            adminPanel.scrollTo(0, 0);
+        }
+
+        // Close admin panel
+        function closeAdminPanel() {
+            adminPanel.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            resetPropertyForm();
+        }
+
+        // Reset property form
+        function resetPropertyForm() {
+            propertyForm.reset();
+            selectedImages = [];
+            imagePreviewContainer.innerHTML = '';
+            document.getElementById('propertyUpdateDateInput').value = new Date().toLocaleDateString('fa-IR');
+            isEditing = false;
+            currentPropertyId = null;
+        }
+
+        // Close property info when clicking on the map
+        if (map) {
+            map.on('click', () => {
+                document.getElementById('propertyInfo').classList.remove('active');
+            });
+        }
+
+        // Error handling
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('Error:', message, 'at', source, 'line', lineno);
+        };
+    </script>
+</body>
+</html>
